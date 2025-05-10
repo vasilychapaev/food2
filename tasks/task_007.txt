@@ -1,0 +1,173 @@
+# Task ID: 7
+# Title: Implement Data Synchronization Service
+# Status: pending
+# Dependencies: 3, 4, 5, 6
+# Priority: high
+# Description: Create a service to synchronize data between Google Sheets and MongoDB
+# Details:
+Create a DataSyncService to handle synchronization between Google Sheets and MongoDB:
+
+```php
+<?php
+namespace App\Services;
+
+use App\Models\Ingredient;
+use App\Models\Recipe;
+use App\Models\FoodEntry;
+use App\Models\DailySummary;
+use Illuminate\Support\Facades\Log;
+
+class DataSyncService
+{
+    private $googleSheetsService;
+    private $dataParserService;
+    private $nutritionCalculatorService;
+    
+    public function __construct(
+        GoogleSheetsService $googleSheetsService,
+        DataParserService $dataParserService,
+        NutritionCalculatorService $nutritionCalculatorService
+    ) {
+        $this->googleSheetsService = $googleSheetsService;
+        $this->dataParserService = $dataParserService;
+        $this->nutritionCalculatorService = $nutritionCalculatorService;
+    }
+    
+    public function syncAll()
+    {
+        Log::info('Starting full data synchronization');
+        
+        $this->syncIngredients();
+        $this->syncRecipes();
+        $this->syncFoodLog();
+        
+        Log::info('Full data synchronization completed');
+    }
+    
+    public function syncIngredients()
+    {
+        Log::info('Syncing ingredients');
+        
+        $rawData = $this->googleSheetsService->getIngredientsSheet();
+        $parsedIngredients = $this->dataParserService->parseIngredients($rawData);
+        
+        foreach ($parsedIngredients as $ingredientData) {
+            Ingredient::updateOrCreate(
+                ['name' => $ingredientData['name']],
+                $ingredientData
+            );
+        }
+        
+        Log::info('Ingredients sync completed: ' . count($parsedIngredients) . ' ingredients processed');
+    }
+    
+    public function syncRecipes()
+    {
+        Log::info('Syncing recipes');
+        
+        $rawData = $this->googleSheetsService->getRecipesSheet();
+        $parsedRecipes = $this->dataParserService->parseRecipes($rawData);
+        $ingredients = Ingredient::all()->toArray();
+        
+        foreach ($parsedRecipes as $recipeData) {
+            $nutritionData = $this->nutritionCalculatorService->calculateRecipeNutrition((object)$recipeData, $ingredients);
+            $recipeData = array_merge($recipeData, $nutritionData);
+            
+            Recipe::updateOrCreate(
+                ['name' => $recipeData['name']],
+                $recipeData
+            );
+        }
+        
+        Log::info('Recipes sync completed: ' . count($parsedRecipes) . ' recipes processed');
+    }
+    
+    public function syncFoodLog()
+    {
+        Log::info('Syncing food log');
+        
+        $rawData = $this->googleSheetsService->getFoodLogSheet();
+        $parsedFoodEntries = $this->dataParserService->parseFoodLog($rawData);
+        $ingredients = Ingredient::all()->toArray();
+        $recipes = Recipe::all()->toArray();
+        
+        $processedDates = [];
+        
+        foreach ($parsedFoodEntries as $foodEntryData) {
+            $nutritionData = $this->nutritionCalculatorService->calculateFoodEntryNutrition(
+                $foodEntryData['raw_entry'],
+                $ingredients,
+                $recipes
+            );
+            
+            $foodEntryData = array_merge($foodEntryData, $nutritionData);
+            
+            FoodEntry::updateOrCreate(
+                [
+                    'date' => $foodEntryData['date'],
+                    'meal_number' => $foodEntryData['meal_number'],
+                    'raw_entry' => $foodEntryData['raw_entry']
+                ],
+                $foodEntryData
+            );
+            
+            if (!in_array($foodEntryData['date'], $processedDates)) {
+                $processedDates[] = $foodEntryData['date'];
+            }
+        }
+        
+        // Update daily summaries for all affected dates
+        foreach ($processedDates as $date) {
+            $this->updateDailySummary($date);
+        }
+        
+        Log::info('Food log sync completed: ' . count($parsedFoodEntries) . ' entries processed');
+    }
+    
+    private function updateDailySummary($date)
+    {
+        Log::info('Updating daily summary for ' . $date);
+        
+        $foodEntries = FoodEntry::where('date', $date)->get();
+        
+        $totalCalories = 0;
+        $totalProtein = 0;
+        $totalFat = 0;
+        $totalCarbs = 0;
+        $meals = [];
+        
+        foreach ($foodEntries as $entry) {
+            $totalCalories += $entry->calories;
+            $totalProtein += $entry->protein;
+            $totalFat += $entry->fat;
+            $totalCarbs += $entry->carbs;
+            
+            $meals[] = [
+                'meal_number' => $entry->meal_number,
+                'raw_entry' => $entry->raw_entry,
+                'parsed_items' => $entry->parsed_items,
+                'calories' => $entry->calories,
+                'protein' => $entry->protein,
+                'fat' => $entry->fat,
+                'carbs' => $entry->carbs
+            ];
+        }
+        
+        DailySummary::updateOrCreate(
+            ['date' => $date],
+            [
+                'meals' => $meals,
+                'total_calories' => $totalCalories,
+                'total_protein' => $totalProtein,
+                'total_fat' => $totalFat,
+                'total_carbs' => $totalCarbs
+            ]
+        );
+        
+        Log::info('Daily summary updated for ' . $date);
+    }
+}
+```
+
+# Test Strategy:
+Create integration tests that mock Google Sheets API responses and verify the synchronization process. Test scenarios with new, updated, and deleted entries. Verify that daily summaries are correctly calculated and updated.

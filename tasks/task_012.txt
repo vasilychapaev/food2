@@ -1,0 +1,116 @@
+# Task ID: 12
+# Title: Create Show View
+# Status: pending
+# Dependencies: 10
+# Priority: medium
+# Description: Create a view to display detailed information for a specific day
+# Details:
+Create the show view at resources/views/food-tracker/show.blade.php:
+
+```blade
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <h1>Daily Food Log: {{ $dailySummary->date->format('Y-m-d') }}</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2>Daily Summary</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Calories</h5>
+                            <p class="card-text fs-2">{{ number_format($dailySummary->total_calories, 1) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Protein (g)</h5>
+                            <p class="card-text fs-2">{{ number_format($dailySummary->total_protein, 1) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Fat (g)</h5>
+                            <p class="card-text fs-2">{{ number_format($dailySummary->total_fat, 1) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">Carbs (g)</h5>
+                            <p class="card-text fs-2">{{ number_format($dailySummary->total_carbs, 1) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <h2>Meals</h2>
+    
+    @foreach($dailySummary->meals as $index => $meal)
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3>Meal {{ $meal['meal_number'] }}</h3>
+            <div>
+                <span class="badge bg-primary">{{ number_format($meal['calories'], 1) }} cal</span>
+                <span class="badge bg-success">{{ number_format($meal['protein'], 1) }}g protein</span>
+                <span class="badge bg-danger">{{ number_format($meal['fat'], 1) }}g fat</span>
+                <span class="badge bg-warning text-dark">{{ number_format($meal['carbs'], 1) }}g carbs</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <p><strong>Raw Entry:</strong> {{ $meal['raw_entry'] }}</p>
+            
+            <h4>Items</h4>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Name</th>
+                            <th>Weight (g)</th>
+                            <th>Calories</th>
+                            <th>Protein (g)</th>
+                            <th>Fat (g)</th>
+                            <th>Carbs (g)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($meal['parsed_items'] as $item)
+                        <tr>
+                            <td>{{ ucfirst($item['type']) }}</td>
+                            <td>{{ $item['name'] }}</td>
+                            <td>{{ number_format($item['weight'], 1) }}</td>
+                            <td>{{ number_format($item['calories'], 1) }}</td>
+                            <td>{{ number_format($item['protein'], 1) }}</td>
+                            <td>{{ number_format($item['fat'], 1) }}</td>
+                            <td>{{ number_format($item['carbs'], 1) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endforeach
+    
+    <div class="mb-4">
+        <a href="{{ route('food-tracker.index') }}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+@endsection
+```
+
+# Test Strategy:
+Create a browser test that visits the show page for a specific date and verifies that all expected elements are present. Test that the page displays the correct daily summary information and that each meal is displayed with its items. Test that the 'Back to List' button navigates back to the index page.

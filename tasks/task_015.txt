@@ -1,0 +1,276 @@
+# Task ID: 15
+# Title: Write Documentation
+# Status: pending
+# Dependencies: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
+# Priority: low
+# Description: Create comprehensive documentation for the application
+# Details:
+Create a README.md file with the following sections:
+
+```markdown
+# Calorie and Macronutrient Tracking Application
+
+A Laravel application that automatically collects data from Google Sheets, calculates calories and macronutrients (protein, fat, carbohydrates) for each meal and day, and stores the results in MongoDB.
+
+## Features
+
+- Automatic synchronization with Google Sheets
+- Parsing of food log entries
+- Calculation of nutrition values for ingredients and recipes
+- Daily summaries of nutrition intake
+- Web interface for viewing food logs and nutrition data
+- API endpoints for programmatic access
+- Webhook for triggering data synchronization
+
+## Requirements
+
+- PHP 8.x
+- Composer
+- MongoDB
+- Docker and Docker Compose (optional)
+
+## Installation
+
+### Using Docker
+
+1. Clone the repository
+2. Copy `.env.example` to `.env` and configure environment variables
+3. Run `docker-compose up -d`
+4. Access the application at http://localhost:8000
+
+### Manual Installation
+
+1. Clone the repository
+2. Copy `.env.example` to `.env` and configure environment variables
+3. Run `composer install`
+4. Run `php artisan serve`
+5. Access the application at http://localhost:8000
+
+## Configuration
+
+### Google Sheets Integration
+
+1. Create a Google Cloud project and enable the Google Sheets API
+2. Create service account credentials and download the JSON key file
+3. Place the key file in the `storage` directory and update the path in `.env`
+4. Share your Google Sheet with the service account email
+
+### MongoDB Configuration
+
+1. Configure MongoDB connection details in `.env`
+
+### Webhook Configuration
+
+1. Set a secure webhook token in `.env`
+2. Use the webhook URL: `https://your-domain.com/api/webhook/sync`
+3. Include the token in the `X-Webhook-Token` header
+
+## Usage
+
+### Web Interface
+
+- Home page: List of daily summaries
+- Daily detail page: Detailed information for a specific day
+
+### API Endpoints
+
+- `GET /api/v1/daily-summaries`: List of daily summaries
+- `GET /api/v1/daily-summaries/{date}`: Detailed information for a specific date
+- `GET /api/v1/ingredients`: List of all ingredients
+- `GET /api/v1/recipes`: List of all recipes
+
+### Webhook
+
+- `POST /api/webhook/sync`: Trigger data synchronization
+  - Optional parameter: `sync_type` (ingredients, recipes, food_log)
+
+## Data Structure
+
+### Google Sheets
+
+- **Ingredients**: List of products with aliases and nutrition values per 100g
+- **Recipes**: Recipes where ingredients are mixed (e.g., salads)
+- **FoodLog**: Log of user's meals (each row is a separate meal, products separated by dots and weight by dots, e.g., "chicken.120 - buckwheat.50")
+
+### MongoDB Collections
+
+- **ingredients**: Ingredients with nutrition values
+- **recipes**: Recipes with ingredients and calculated nutrition values
+- **food_entries**: Individual meal entries with parsed items and nutrition values
+- **daily_summaries**: Daily summaries with meals and total nutrition values
+
+## License
+
+MIT
+```
+
+Also create API documentation in a separate file:
+
+```markdown
+# API Documentation
+
+## Authentication
+
+Currently, the API does not require authentication.
+
+## Endpoints
+
+### GET /api/v1/daily-summaries
+
+Returns a list of daily summaries.
+
+**Query Parameters:**
+- `limit` (optional): Maximum number of summaries to return (default: 30)
+
+**Response:**
+```json
+[
+  {
+    "date": "2023-11-01",
+    "total_calories": 2145.5,
+    "total_protein": 120.3,
+    "total_fat": 70.8,
+    "total_carbs": 230.5,
+    "meal_count": 3
+  },
+  ...
+]
+```
+
+### GET /api/v1/daily-summaries/{date}
+
+Returns detailed information for a specific date.
+
+**Parameters:**
+- `date`: Date in YYYY-MM-DD format
+
+**Response:**
+```json
+{
+  "date": "2023-11-01",
+  "total_calories": 2145.5,
+  "total_protein": 120.3,
+  "total_fat": 70.8,
+  "total_carbs": 230.5,
+  "meals": [
+    {
+      "meal_number": 1,
+      "raw_entry": "chicken.120 - buckwheat.50",
+      "parsed_items": [
+        {
+          "type": "ingredient",
+          "name": "chicken",
+          "weight": 120,
+          "calories": 198.0,
+          "protein": 41.4,
+          "fat": 4.2,
+          "carbs": 0
+        },
+        {
+          "type": "ingredient",
+          "name": "buckwheat",
+          "weight": 50,
+          "calories": 170.0,
+          "protein": 6.1,
+          "fat": 1.2,
+          "carbs": 35.7
+        }
+      ],
+      "calories": 368.0,
+      "protein": 47.5,
+      "fat": 5.4,
+      "carbs": 35.7
+    },
+    ...
+  ]
+}
+```
+
+### GET /api/v1/ingredients
+
+Returns a list of all ingredients.
+
+**Response:**
+```json
+[
+  {
+    "_id": "...",
+    "name": "chicken",
+    "aliases": ["chicken breast", "chicken fillet"],
+    "calories": 165.0,
+    "protein": 34.5,
+    "fat": 3.5,
+    "carbs": 0,
+    "created_at": "2023-11-01T12:00:00.000Z",
+    "updated_at": "2023-11-01T12:00:00.000Z"
+  },
+  ...
+]
+```
+
+### GET /api/v1/recipes
+
+Returns a list of all recipes.
+
+**Response:**
+```json
+[
+  {
+    "_id": "...",
+    "name": "Greek Salad",
+    "aliases": ["greek"],
+    "ingredients": [
+      {
+        "name": "cucumber",
+        "weight": 100
+      },
+      {
+        "name": "tomato",
+        "weight": 100
+      },
+      {
+        "name": "feta",
+        "weight": 50
+      },
+      {
+        "name": "olive oil",
+        "weight": 15
+      }
+    ],
+    "total_weight": 265,
+    "calories": 235.5,
+    "protein": 8.7,
+    "fat": 18.3,
+    "carbs": 10.2,
+    "created_at": "2023-11-01T12:00:00.000Z",
+    "updated_at": "2023-11-01T12:00:00.000Z"
+  },
+  ...
+]
+```
+
+### POST /api/webhook/sync
+
+Triggers data synchronization from Google Sheets.
+
+**Headers:**
+- `X-Webhook-Token`: Authentication token (required)
+
+**Request Body:**
+```json
+{
+  "sync_type": "food_log" // Optional: "ingredients", "recipes", "food_log", or omit for full sync
+}
+```
+
+**Response:**
+```json
+{
+  "status": "success",
+  "message": "Data synchronization completed"
+}
+```
+```
+
+# Test Strategy:
+Review the documentation for accuracy and completeness. Verify that all installation steps, configuration options, and usage instructions are correct. Test the API documentation by making requests to each endpoint and comparing the responses to the documented examples.

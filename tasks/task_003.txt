@@ -1,0 +1,140 @@
+# Task ID: 3
+# Title: Create MongoDB Models
+# Status: pending
+# Dependencies: 2
+# Priority: high
+# Description: Define MongoDB models for ingredients, recipes, food logs, and daily summaries
+# Details:
+Create the following models extending the MongoDB model class:
+
+1. Ingredient.php:
+```php
+<?php
+namespace App\Models;
+use Jenssegers\Mongodb\Eloquent\Model;
+
+class Ingredient extends Model
+{
+    protected $connection = 'mongodb';
+    protected $collection = 'ingredients';
+    
+    protected $fillable = [
+        'name',
+        'aliases',
+        'calories',
+        'protein',
+        'fat',
+        'carbs'
+    ];
+    
+    protected $casts = [
+        'aliases' => 'array',
+        'calories' => 'float',
+        'protein' => 'float',
+        'fat' => 'float',
+        'carbs' => 'float'
+    ];
+}
+```
+
+2. Recipe.php:
+```php
+<?php
+namespace App\Models;
+use Jenssegers\Mongodb\Eloquent\Model;
+
+class Recipe extends Model
+{
+    protected $connection = 'mongodb';
+    protected $collection = 'recipes';
+    
+    protected $fillable = [
+        'name',
+        'aliases',
+        'ingredients',
+        'total_weight',
+        'calories',
+        'protein',
+        'fat',
+        'carbs'
+    ];
+    
+    protected $casts = [
+        'aliases' => 'array',
+        'ingredients' => 'array',
+        'total_weight' => 'float',
+        'calories' => 'float',
+        'protein' => 'float',
+        'fat' => 'float',
+        'carbs' => 'float'
+    ];
+}
+```
+
+3. FoodEntry.php:
+```php
+<?php
+namespace App\Models;
+use Jenssegers\Mongodb\Eloquent\Model;
+
+class FoodEntry extends Model
+{
+    protected $connection = 'mongodb';
+    protected $collection = 'food_entries';
+    
+    protected $fillable = [
+        'date',
+        'meal_number',
+        'raw_entry',
+        'parsed_items',
+        'calories',
+        'protein',
+        'fat',
+        'carbs'
+    ];
+    
+    protected $casts = [
+        'date' => 'date',
+        'meal_number' => 'integer',
+        'parsed_items' => 'array',
+        'calories' => 'float',
+        'protein' => 'float',
+        'fat' => 'float',
+        'carbs' => 'float'
+    ];
+}
+```
+
+4. DailySummary.php:
+```php
+<?php
+namespace App\Models;
+use Jenssegers\Mongodb\Eloquent\Model;
+
+class DailySummary extends Model
+{
+    protected $connection = 'mongodb';
+    protected $collection = 'daily_summaries';
+    
+    protected $fillable = [
+        'date',
+        'meals',
+        'total_calories',
+        'total_protein',
+        'total_fat',
+        'total_carbs'
+    ];
+    
+    protected $casts = [
+        'date' => 'date',
+        'meals' => 'array',
+        'total_calories' => 'float',
+        'total_protein' => 'float',
+        'total_fat' => 'float',
+        'total_carbs' => 'float'
+    ];
+}
+```
+
+# Test Strategy:
+Create unit tests for each model to verify they correctly store and retrieve data from MongoDB. Test the relationship between models and ensure proper type casting for numeric fields.

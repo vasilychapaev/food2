@@ -1,0 +1,49 @@
+# Task ID: 10
+# Title: Implement Food Tracker Controller
+# Status: pending
+# Dependencies: 3, 7
+# Priority: medium
+# Description: Create a controller to display food tracking data and daily summaries
+# Details:
+Create a FoodTrackerController to handle the index and show routes:
+
+```php
+<?php
+namespace App\Http\Controllers;
+
+use App\Models\DailySummary;
+use Illuminate\Http\Request;
+
+class FoodTrackerController extends Controller
+{
+    /**
+     * Display a listing of daily summaries.
+     */
+    public function index()
+    {
+        $dailySummaries = DailySummary::orderBy('date', 'desc')->get();
+        
+        return view('food-tracker.index', compact('dailySummaries'));
+    }
+    
+    /**
+     * Display the detailed food log for a specific date.
+     */
+    public function show($date)
+    {
+        $dailySummary = DailySummary::where('date', $date)->firstOrFail();
+        
+        return view('food-tracker.show', compact('dailySummary'));
+    }
+}
+```
+
+Add routes in routes/web.php:
+
+```php
+Route::get('/', [FoodTrackerController::class, 'index'])->name('food-tracker.index');
+Route::get('/day/{date}', [FoodTrackerController::class, 'show'])->name('food-tracker.show');
+```
+
+# Test Strategy:
+Create feature tests for both the index and show methods. Test that the index page displays all daily summaries in descending date order. Test that the show page displays detailed information for a specific date, including all meals and nutrition totals.

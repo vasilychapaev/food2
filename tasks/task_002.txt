@@ -1,0 +1,44 @@
+# Task ID: 2
+# Title: Initialize Laravel Project
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: Create a new Laravel project and configure it to work with MongoDB
+# Details:
+1. Create a new Laravel project:
+```bash
+composer create-project laravel/laravel .
+```
+
+2. Install MongoDB PHP driver and Laravel MongoDB package:
+```bash
+composer require jenssegers/mongodb
+```
+
+3. Configure MongoDB connection in config/database.php:
+```php
+'mongodb' => [
+    'driver' => 'mongodb',
+    'host' => env('MONGO_HOST', 'mongo'),
+    'port' => env('MONGO_PORT', 27017),
+    'database' => env('MONGO_DATABASE', 'food_tracker'),
+    'username' => env('MONGO_USERNAME', ''),
+    'password' => env('MONGO_PASSWORD', ''),
+    'options' => [
+        'database' => env('MONGO_AUTH_DATABASE', 'admin'),
+    ],
+],
+```
+
+4. Update .env file with MongoDB connection details
+
+5. Configure the MongoDB service provider in config/app.php:
+```php
+'providers' => [
+    // ...
+    Jenssegers\Mongodb\MongodbServiceProvider::class,
+],
+```
+
+# Test Strategy:
+Run 'php artisan tinker' and test MongoDB connection by creating and retrieving a test document. Verify that Laravel can connect to MongoDB and perform basic CRUD operations.

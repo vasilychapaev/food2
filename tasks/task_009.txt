@@ -1,0 +1,83 @@
+# Task ID: 9
+# Title: Implement Webhook for Data Synchronization
+# Status: pending
+# Dependencies: 7
+# Priority: medium
+# Description: Create a webhook endpoint to trigger data synchronization on demand
+# Details:
+1. Create a controller for the webhook endpoint:
+
+```php
+<?php
+namespace App\Http\Controllers;
+
+use App\Services\DataSyncService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+class WebhookController extends Controller
+{
+    private $dataSyncService;
+    
+    public function __construct(DataSyncService $dataSyncService)
+    {
+        $this->dataSyncService = $dataSyncService;
+    }
+    
+    public function syncData(Request $request)
+    {
+        // Validate webhook request (you might want to add authentication)
+        $token = $request->header('X-Webhook-Token');
+        if ($token !== config('services.webhook.token')) {
+            Log::warning('Invalid webhook token received');
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        
+        Log::info('Webhook received for data synchronization');
+        
+        try {
+            // Check if specific sync type is requested
+            $syncType = $request->input('sync_type');
+            
+            if ($syncType === 'ingredients') {
+                $this->dataSyncService->syncIngredients();
+            } else if ($syncType === 'recipes') {
+                $this->dataSyncService->syncRecipes();
+            } else if ($syncType === 'food_log') {
+                $this->dataSyncService->syncFoodLog();
+            } else {
+                // Default to full sync
+                $this->dataSyncService->syncAll();
+            }
+            
+            return response()->json(['status' => 'success', 'message' => 'Data synchronization completed']);
+        } catch (\Exception $e) {
+            Log::error('Webhook sync failed: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+}
+```
+
+2. Add the webhook route in routes/api.php:
+
+```php
+Route::post('/webhook/sync', [WebhookController::class, 'syncData']);
+```
+
+3. Add webhook token configuration in config/services.php:
+
+```php
+'webhook' => [
+    'token' => env('WEBHOOK_TOKEN'),
+],
+```
+
+4. Update .env file with a secure webhook token:
+
+```
+WEBHOOK_TOKEN=your-secure-random-token
+```
+
+# Test Strategy:
+Create a test that sends a POST request to the webhook endpoint with various sync_type parameters and verifies the response. Test authentication by sending requests with valid and invalid tokens. Verify that the appropriate synchronization methods are called based on the sync_type parameter.

@@ -1,0 +1,64 @@
+# Task ID: 8
+# Title: Implement Cron Job for Data Synchronization
+# Status: pending
+# Dependencies: 7
+# Priority: medium
+# Description: Set up a scheduled task to periodically sync data from Google Sheets
+# Details:
+1. Create a console command for data synchronization:
+
+```php
+<?php
+namespace App\Console\Commands;
+
+use App\Services\DataSyncService;
+use Illuminate\Console\Command;
+
+class SyncGoogleSheetsData extends Command
+{
+    protected $signature = 'app:sync-google-sheets';
+    protected $description = 'Synchronize data from Google Sheets';
+    
+    private $dataSyncService;
+    
+    public function __construct(DataSyncService $dataSyncService)
+    {
+        parent::__construct();
+        $this->dataSyncService = $dataSyncService;
+    }
+    
+    public function handle()
+    {
+        $this->info('Starting Google Sheets data synchronization...');
+        
+        try {
+            $this->dataSyncService->syncAll();
+            $this->info('Data synchronization completed successfully.');
+            return 0;
+        } catch (\Exception $e) {
+            $this->error('Data synchronization failed: ' . $e->getMessage());
+            return 1;
+        }
+    }
+}
+```
+
+2. Register the command in App\Console\Kernel.php:
+
+```php
+protected function schedule(Schedule $schedule)
+{
+    $schedule->command('app:sync-google-sheets')->hourly();
+}
+```
+
+3. Ensure the Laravel scheduler is running by adding this to your server's crontab:
+
+```
+* * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Or in Docker, make sure the scheduler is running in the container.
+
+# Test Strategy:
+Test the command by running 'php artisan app:sync-google-sheets' and verifying that data is correctly synchronized. Test the scheduler by temporarily setting a more frequent schedule (e.g., every minute) and verifying that the command runs automatically.

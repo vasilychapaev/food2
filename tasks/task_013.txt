@@ -1,0 +1,119 @@
+# Task ID: 13
+# Title: Implement Logging System
+# Status: pending
+# Dependencies: 7
+# Priority: low
+# Description: Set up comprehensive logging for all data processing and synchronization steps
+# Details:
+1. Configure Laravel's logging system in config/logging.php to use daily files:
+
+```php
+'channels' => [
+    'stack' => [
+        'driver' => 'stack',
+        'channels' => ['single', 'daily'],
+        'ignore_exceptions' => false,
+    ],
+    
+    'single' => [
+        'driver' => 'single',
+        'path' => storage_path('logs/laravel.log'),
+        'level' => env('LOG_LEVEL', 'debug'),
+    ],
+    
+    'daily' => [
+        'driver' => 'daily',
+        'path' => storage_path('logs/laravel.log'),
+        'level' => env('LOG_LEVEL', 'debug'),
+        'days' => 14,
+    ],
+    
+    'sync' => [
+        'driver' => 'daily',
+        'path' => storage_path('logs/sync.log'),
+        'level' => env('LOG_LEVEL', 'debug'),
+        'days' => 30,
+    ],
+],
+```
+
+2. Create a custom logging channel for synchronization:
+
+```php
+use Illuminate\Support\Facades\Log;
+
+class SyncLogger
+{
+    public static function info($message, array $context = [])
+    {
+        Log::channel('sync')->info($message, $context);
+    }
+    
+    public static function error($message, array $context = [])
+    {
+        Log::channel('sync')->error($message, $context);
+    }
+    
+    public static function warning($message, array $context = [])
+    {
+        Log::channel('sync')->warning($message, $context);
+    }
+    
+    public static function debug($message, array $context = [])
+    {
+        Log::channel('sync')->debug($message, $context);
+    }
+}
+```
+
+3. Update the DataSyncService to use the custom logger:
+
+```php
+use App\Logging\SyncLogger;
+
+// Replace Log::info with SyncLogger::info
+// Replace Log::error with SyncLogger::error
+// etc.
+```
+
+4. Add more detailed logging throughout the synchronization process:
+
+```php
+public function syncIngredients()
+{
+    SyncLogger::info('Starting ingredients synchronization');
+    
+    try {
+        $rawData = $this->googleSheetsService->getIngredientsSheet();
+        SyncLogger::debug('Retrieved ' . count($rawData) . ' rows from Google Sheets');
+        
+        $parsedIngredients = $this->dataParserService->parseIngredients($rawData);
+        SyncLogger::debug('Parsed ' . count($parsedIngredients) . ' ingredients');
+        
+        $updated = 0;
+        $created = 0;
+        
+        foreach ($parsedIngredients as $ingredientData) {
+            $ingredient = Ingredient::where('name', $ingredientData['name'])->first();
+            
+            if ($ingredient) {
+                $ingredient->update($ingredientData);
+                $updated++;
+            } else {
+                Ingredient::create($ingredientData);
+                $created++;
+            }
+        }
+        
+        SyncLogger::info('Ingredients sync completed: ' . $created . ' created, ' . $updated . ' updated');
+    } catch (\Exception $e) {
+        SyncLogger::error('Ingredients sync failed: ' . $e->getMessage(), [
+            'exception' => $e,
+        ]);
+        throw $e;
+    }
+}
+```
+
+# Test Strategy:
+Create tests that verify log entries are created at the appropriate points in the synchronization process. Test error scenarios to ensure exceptions are properly logged. Verify that logs are written to the correct files and contain the expected information.

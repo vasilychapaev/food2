@@ -1,0 +1,94 @@
+# Task ID: 14
+# Title: Create API Endpoints
+# Status: pending
+# Dependencies: 3, 7
+# Priority: low
+# Description: Implement API endpoints to access food tracking data programmatically
+# Details:
+Create an API controller to provide JSON access to food tracking data:
+
+```php
+<?php
+namespace App\Http\Controllers\Api;
+
+use App\Models\DailySummary;
+use App\Models\Ingredient;
+use App\Models\Recipe;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+
+class FoodTrackerApiController extends Controller
+{
+    /**
+     * Get a list of all daily summaries.
+     */
+    public function getDailySummaries(Request $request)
+    {
+        $limit = $request->input('limit', 30);
+        $dailySummaries = DailySummary::orderBy('date', 'desc')
+            ->limit($limit)
+            ->get()
+            ->map(function ($summary) {
+                return [
+                    'date' => $summary->date->format('Y-m-d'),
+                    'total_calories' => $summary->total_calories,
+                    'total_protein' => $summary->total_protein,
+                    'total_fat' => $summary->total_fat,
+                    'total_carbs' => $summary->total_carbs,
+                    'meal_count' => count($summary->meals),
+                ];
+            });
+        
+        return response()->json($dailySummaries);
+    }
+    
+    /**
+     * Get detailed information for a specific date.
+     */
+    public function getDailySummary($date)
+    {
+        $dailySummary = DailySummary::where('date', $date)->firstOrFail();
+        
+        return response()->json([
+            'date' => $dailySummary->date->format('Y-m-d'),
+            'total_calories' => $dailySummary->total_calories,
+            'total_protein' => $dailySummary->total_protein,
+            'total_fat' => $dailySummary->total_fat,
+            'total_carbs' => $dailySummary->total_carbs,
+            'meals' => $dailySummary->meals,
+        ]);
+    }
+    
+    /**
+     * Get a list of all ingredients.
+     */
+    public function getIngredients()
+    {
+        $ingredients = Ingredient::all();
+        return response()->json($ingredients);
+    }
+    
+    /**
+     * Get a list of all recipes.
+     */
+    public function getRecipes()
+    {
+        $recipes = Recipe::all();
+        return response()->json($recipes);
+    }
+}
+```
+
+Add API routes in routes/api.php:
+
+```php
+Route::prefix('v1')->group(function () {
+    Route::get('/daily-summaries', [FoodTrackerApiController::class, 'getDailySummaries']);
+    Route::get('/daily-summaries/{date}', [FoodTrackerApiController::class, 'getDailySummary']);
+    Route::get('/ingredients', [FoodTrackerApiController::class, 'getIngredients']);
+    Route::get('/recipes', [FoodTrackerApiController::class, 'getRecipes']);
+});
+```
+
+# Test Strategy:
+Create API tests for each endpoint to verify they return the expected JSON structure and data. Test pagination and filtering options. Test error handling for invalid requests or missing data.
