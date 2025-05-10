@@ -1,6 +1,6 @@
 # Task ID: 2
 # Title: Initialize Laravel Project
-# Status: pending
+# Status: done
 # Dependencies: 1
 # Priority: high
 # Description: Create a new Laravel project and configure it to work with MongoDB
@@ -12,7 +12,7 @@ composer create-project laravel/laravel .
 
 2. Install MongoDB PHP driver and Laravel MongoDB package:
 ```bash
-composer require mongodb/laravel-mongodb
+composer require jenssegers/mongodb
 ```
 
 3. Configure MongoDB connection in config/database.php:
