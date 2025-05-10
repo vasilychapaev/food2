@@ -1,6 +1,6 @@
 # Task ID: 12
 # Title: Create Show View
-# Status: pending
+# Status: done
 # Dependencies: 10
 # Priority: medium
 # Description: Create a view to display detailed information for a specific day

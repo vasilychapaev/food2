@@ -1,6 +1,6 @@
 # Task ID: 11
 # Title: Create Index View
-# Status: pending
+# Status: done
 # Dependencies: 10
 # Priority: medium
 # Description: Create a view to display a list of daily summaries
