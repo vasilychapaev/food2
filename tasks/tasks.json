@@ -8,7 +8,7 @@
       "testStrategy": "Verify Docker Compose setup by running 'docker-compose up' and ensuring both Laravel and MongoDB services start correctly. Test connectivity between services by accessing Laravel application and verifying it can connect to MongoDB.",
       "priority": "high",
       "dependencies": [],
-      "status": "pending",
+      "status": "done",
       "subtasks": []
     },
     {

@@ -1,6 +1,6 @@
 # Task ID: 1
 # Title: Setup Docker Environment
-# Status: pending
+# Status: done
 # Dependencies: None
 # Priority: high
 # Description: Create Docker Compose configuration for Laravel and MongoDB services
