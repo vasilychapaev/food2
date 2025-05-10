@@ -1,14 +1,5 @@
-# Task ID: 5
-# Title: Implement Data Parser Service
-# Status: done
-# Dependencies: 3, 4
-# Priority: high
-# Description: Create a service to parse and process data from Google Sheets into structured format
-# Details:
-Create a DataParserService to transform raw Google Sheets data into structured objects:
-
-```php
 <?php
+
 namespace App\Services;
 
 class DataParserService
@@ -17,12 +8,10 @@ class DataParserService
     {
         $ingredients = [];
         $headers = array_shift($rawData);
-        
         foreach ($rawData as $row) {
             if (count($row) < count($headers)) {
-                continue; // Skip incomplete rows
+                continue;
             }
-            
             $ingredient = [
                 'name' => $row[0] ?? '',
                 'aliases' => $this->parseAliases($row[1] ?? ''),
@@ -31,54 +20,45 @@ class DataParserService
                 'fat' => (float)($row[4] ?? 0),
                 'carbs' => (float)($row[5] ?? 0)
             ];
-            
             $ingredients[] = $ingredient;
         }
-        
         return $ingredients;
     }
-    
+
     public function parseRecipes(array $rawData)
     {
         $recipes = [];
         $headers = array_shift($rawData);
-        
         foreach ($rawData as $row) {
             if (count($row) < count($headers)) {
-                continue; // Skip incomplete rows
+                continue;
             }
-            
             $recipe = [
                 'name' => $row[0] ?? '',
                 'aliases' => $this->parseAliases($row[1] ?? ''),
                 'ingredients' => $this->parseRecipeIngredients($row[2] ?? ''),
-                'total_weight' => 0, // Will be calculated later
-                'calories' => 0, // Will be calculated later
-                'protein' => 0, // Will be calculated later
-                'fat' => 0, // Will be calculated later
-                'carbs' => 0 // Will be calculated later
+                'total_weight' => 0,
+                'calories' => 0,
+                'protein' => 0,
+                'fat' => 0,
+                'carbs' => 0
             ];
-            
             $recipes[] = $recipe;
         }
-        
         return $recipes;
     }
-    
+
     public function parseFoodLog(array $rawData)
     {
         $foodEntries = [];
         $headers = array_shift($rawData);
-        
         foreach ($rawData as $row) {
             if (count($row) < count($headers)) {
-                continue; // Skip incomplete rows
+                continue;
             }
-            
             $date = $this->parseDate($row[0] ?? '');
             $mealNumber = (int)($row[1] ?? 0);
             $rawEntry = $row[2] ?? '';
-            
             $foodEntry = [
                 'date' => $date,
                 'meal_number' => $mealNumber,
@@ -89,23 +69,20 @@ class DataParserService
                 'fat' => 0,
                 'carbs' => 0
             ];
-            
             $foodEntries[] = $foodEntry;
         }
-        
         return $foodEntries;
     }
-    
+
     private function parseAliases(string $aliasString)
     {
         return array_map('trim', explode(',', $aliasString));
     }
-    
+
     private function parseRecipeIngredients(string $ingredientsString)
     {
         $ingredients = [];
         $items = array_map('trim', explode(',', $ingredientsString));
-        
         foreach ($items as $item) {
             $parts = explode('.', $item);
             if (count($parts) >= 2) {
@@ -115,15 +92,13 @@ class DataParserService
                 ];
             }
         }
-        
         return $ingredients;
     }
-    
+
     public function parseFoodEntryItems(string $rawEntry)
     {
         $items = [];
         $entries = array_map('trim', explode('-', $rawEntry));
-        
         foreach ($entries as $entry) {
             $parts = explode('.', $entry);
             if (count($parts) >= 2) {
@@ -133,17 +108,11 @@ class DataParserService
                 ];
             }
         }
-        
         return $items;
     }
-    
+
     private function parseDate(string $dateString)
     {
-        // Assuming date format is YYYY-MM-DD
         return date('Y-m-d', strtotime($dateString));
     }
-}
-```
-
-# Test Strategy:
-Create unit tests for each parsing method with various input formats. Test edge cases like empty data, malformed entries, and special characters. Verify that the parser correctly handles aliases, ingredient weights, and date formats.
+} 

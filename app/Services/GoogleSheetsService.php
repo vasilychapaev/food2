@@ -1,18 +1,5 @@
-# Task ID: 4
-# Title: Implement Google Sheets API Integration
-# Status: done
-# Dependencies: 2
-# Priority: high
-# Description: Set up Google Sheets API integration to fetch data from the specified spreadsheet
-# Details:
-1. Install Google API Client:
-```bash
-composer require google/apiclient
-```
-
-2. Create a GoogleSheetsService class:
-```php
 <?php
+
 namespace App\Services;
 
 use Google\Client;
@@ -23,53 +10,36 @@ class GoogleSheetsService
     private $client;
     private $service;
     private $spreadsheetId;
-    
+
     public function __construct()
     {
         $this->spreadsheetId = config('services.google_sheets.spreadsheet_id');
         $this->client = new Client();
         $this->client->setApplicationName('Food Tracker');
         $this->client->setScopes([Sheets::SPREADSHEETS_READONLY]);
-        
-        // Use service account or API key based on your setup
         $this->client->setAuthConfig(storage_path('credentials.json'));
         $this->service = new Sheets($this->client);
     }
-    
+
     public function getIngredientsSheet()
     {
         return $this->getSheetData('Ingredients');
     }
-    
+
     public function getRecipesSheet()
     {
         return $this->getSheetData('Recipes');
     }
-    
+
     public function getFoodLogSheet()
     {
         return $this->getSheetData('FoodLog');
     }
-    
+
     private function getSheetData($sheetName)
     {
         $range = $sheetName;
         $response = $this->service->spreadsheets_values->get($this->spreadsheetId, $range);
         return $response->getValues();
     }
-}
-```
-
-3. Add Google Sheets configuration to config/services.php:
-```php
-'google_sheets' => [
-    'spreadsheet_id' => env('GOOGLE_SHEETS_SPREADSHEET_ID', '1ds9O-FEElpg8m4jseYO7cHBXXQl3WnjtIYqqAXmPnp8'),
-],
-```
-
-4. Update .env file with the spreadsheet ID
-
-5. Set up Google API credentials and store them securely
-
-# Test Strategy:
-Create a test that connects to the Google Sheets API and retrieves data from each sheet (Ingredients, Recipes, FoodLog). Verify that the data structure matches expectations and all required fields are present.
+} 

@@ -1,6 +1,6 @@
 # Task ID: 3
 # Title: Create MongoDB Models
-# Status: pending
+# Status: done
 # Dependencies: 2
 # Priority: high
 # Description: Define MongoDB models for ingredients, recipes, food logs, and daily summaries
