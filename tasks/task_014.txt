@@ -1,6 +1,6 @@
 # Task ID: 14
 # Title: Create API Endpoints
-# Status: pending
+# Status: done
 # Dependencies: 3, 7
 # Priority: low
 # Description: Implement API endpoints to access food tracking data programmatically
