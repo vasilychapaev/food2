@@ -81,47 +81,65 @@ class DataSyncServiceTest extends TestCase
         $this->assertNotNull(Recipe::where('name', 'салат')->first());
     }
 
-    // public function test_sync_food_log_creates_and_updates_and_daily_summary()
+    // public function test_create_and_find_food_entry_by_date()
     // {
-    //     Ingredient::create([
-    //         'name' => 'грудка',
-    //         'aliases' => [],
+    //     $date = '2024-07-01';
+    //     $entry = FoodEntry::create([
+    //         'date' => $date,
+    //         'meal_number' => 1,
+    //         'raw_entry' => 'грудка.100',
+    //         'parsed_items' => [],
     //         'calories' => 100,
     //         'protein' => 20,
     //         'fat' => 2,
     //         'carbs' => 0
     //     ]);
-    //     $googleSheets = Mockery::mock(GoogleSheetsService::class);
-    //     $parser = Mockery::mock(DataParserService::class);
-    //     $nutrition = Mockery::mock(NutritionCalculatorService::class);
-    //     $googleSheets->shouldReceive('getFoodLogSheet')->once()->andReturn([
-    //         ['date','meal_number','raw_entry'],
-    //         ['2024-07-01',1,'грудка.100']
-    //     ]);
-    //     $parser->shouldReceive('parseFoodLog')->once()->andReturn([
-    //         [
-    //             'date' => '2024-07-01',
-    //             'meal_number' => 1,
-    //             'raw_entry' => 'грудка.100'
-    //         ]
-    //     ]);
-    //     $nutrition->shouldReceive('calculateFoodEntryNutrition')->once()->andReturn([
-    //         'parsed_items'=>[['name'=>'грудка','weight'=>100,'calories'=>100,'protein'=>20,'fat'=>2,'carbs'=>0]],
-    //         'calories'=>100,
-    //         'protein'=>20,
-    //         'fat'=>2,
-    //         'carbs'=>0
-    //     ]);
-    //     $this->app->instance(GoogleSheetsService::class, $googleSheets);
-    //     $this->app->instance(DataParserService::class, $parser);
-    //     $this->app->instance(NutritionCalculatorService::class, $nutrition);
-    //     $service = app(DataSyncService::class);
-    //     $service->syncFoodLog();
-    //     $foodEntry = FoodEntry::where('date', '2024-07-01')->where('meal_number', 1)->first();
-    //     $dailySummary = DailySummary::where('date', '2024-07-01')->first();
-    //     fwrite(STDERR, "\nFoodEntry: ".json_encode($foodEntry)."\n");
-    //     fwrite(STDERR, "DailySummary: ".json_encode($dailySummary)."\n");
-    //     $this->assertNotNull($foodEntry);
-    //     $this->assertNotNull($dailySummary);
+    //     $found = FoodEntry::where('date', $date)->where('meal_number', 1)->first();
+    //     fwrite(STDERR, "\nFound by where: ".json_encode($found)."\n");
+    //     $foundAll = FoodEntry::all();
+    //     fwrite(STDERR, "\nAll entries: ".json_encode($foundAll)."\n");
+    //     $this->assertNotNull($found);
     // }
+
+    public function test_sync_food_log_creates_and_updates_and_daily_summary()
+    {
+        Ingredient::create([
+            'name' => 'грудка',
+            'aliases' => [],
+            'calories' => 100,
+            'protein' => 20,
+            'fat' => 2,
+            'carbs' => 0
+        ]);
+        $googleSheets = Mockery::mock(GoogleSheetsService::class);
+        $parser = Mockery::mock(DataParserService::class);
+        $nutrition = Mockery::mock(NutritionCalculatorService::class);
+        $googleSheets->shouldReceive('getFoodLogSheet')->once()->andReturn([
+            ['date','meal_number','raw_entry'],
+            ['2024-07-01',1,'грудка.100']
+        ]);
+        $parser->shouldReceive('parseFoodLog')->once()->andReturn([
+            [
+                'date' => '2024-07-01',
+                'meal_number' => 1,
+                'raw_entry' => 'грудка.100'
+            ]
+        ]);
+        $nutrition->shouldReceive('calculateFoodEntryNutrition')->once()->andReturn([
+            'parsed_items'=>[['name'=>'грудка','weight'=>100,'calories'=>100,'protein'=>20,'fat'=>2,'carbs'=>0]],
+            'calories'=>100,
+            'protein'=>20,
+            'fat'=>2,
+            'carbs'=>0
+        ]);
+        $this->app->instance(GoogleSheetsService::class, $googleSheets);
+        $this->app->instance(DataParserService::class, $parser);
+        $this->app->instance(NutritionCalculatorService::class, $nutrition);
+        $service = app(DataSyncService::class);
+        $service->syncFoodLog();
+        $foodEntry = FoodEntry::where('date', '2024-07-01')->where('meal_number', 1)->first();
+        $dailySummary = DailySummary::where('date', '2024-07-01')->first();
+        $this->assertNotNull($foodEntry);
+        $this->assertNotNull($dailySummary);
+    }
 } 

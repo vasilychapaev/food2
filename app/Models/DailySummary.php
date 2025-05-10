@@ -19,7 +19,6 @@ class DailySummary extends Model
     ];
 
     protected $casts = [
-        'date' => 'date',
         'meals' => 'array',
         'total_calories' => 'float',
         'total_protein' => 'float',

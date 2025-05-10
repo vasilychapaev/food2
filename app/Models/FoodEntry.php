@@ -21,7 +21,6 @@ class FoodEntry extends Model
     ];
 
     protected $casts = [
-        'date' => 'date',
         'meal_number' => 'integer',
         'parsed_items' => 'array',
         'calories' => 'float',
