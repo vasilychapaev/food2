@@ -10,15 +10,11 @@ use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\FoodEntry;
 use App\Models\DailySummary;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Log;
 use Mockery;
 use Tests\TestCase;
 
 class DataSyncServiceTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_sync_ingredients_creates_and_updates()
     {
         $googleSheets = Mockery::mock(GoogleSheetsService::class);
@@ -43,7 +39,7 @@ class DataSyncServiceTest extends TestCase
         $this->app->instance(NutritionCalculatorService::class, $nutrition);
         $service = app(DataSyncService::class);
         $service->syncIngredients();
-        $this->assertDatabaseHas('ingredients', ['name' => 'грудка']);
+        $this->assertNotNull(Ingredient::where('name', 'грудка')->first());
     }
 
     public function test_sync_recipes_creates_and_updates()
@@ -82,7 +78,7 @@ class DataSyncServiceTest extends TestCase
         $this->app->instance(NutritionCalculatorService::class, $nutrition);
         $service = app(DataSyncService::class);
         $service->syncRecipes();
-        $this->assertDatabaseHas('recipes', ['name' => 'салат']);
+        $this->assertNotNull(Recipe::where('name', 'салат')->first());
     }
 
     public function test_sync_food_log_creates_and_updates_and_daily_summary()
@@ -121,7 +117,7 @@ class DataSyncServiceTest extends TestCase
         $this->app->instance(NutritionCalculatorService::class, $nutrition);
         $service = app(DataSyncService::class);
         $service->syncFoodLog();
-        $this->assertDatabaseHas('food_entries', ['date' => '2024-07-01', 'meal_number' => 1]);
-        $this->assertDatabaseHas('daily_summaries', ['date' => '2024-07-01']);
+        $this->assertNotNull(FoodEntry::where('date', '2024-07-01')->where('meal_number', 1)->first());
+        $this->assertNotNull(DailySummary::where('date', '2024-07-01')->first());
     }
 } 
