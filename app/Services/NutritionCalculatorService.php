@@ -1,14 +1,5 @@
-# Task ID: 6
-# Title: Implement Nutrition Calculator Service
-# Status: done
-# Dependencies: 3, 5
-# Priority: high
-# Description: Create a service to calculate nutrition values (calories, protein, fat, carbs) for food entries
-# Details:
-Create a NutritionCalculatorService to calculate nutrition values for food entries and recipes:
-
-```php
 <?php
+
 namespace App\Services;
 
 use App\Models\Ingredient;
@@ -17,35 +8,33 @@ use App\Models\Recipe;
 class NutritionCalculatorService
 {
     private $dataParserService;
-    
+
     public function __construct(DataParserService $dataParserService)
     {
         $this->dataParserService = $dataParserService;
     }
-    
-    public function calculateRecipeNutrition(Recipe $recipe, array $ingredients)
+
+    public function calculateRecipeNutrition(array $recipe, array $ingredients)
     {
         $totalWeight = 0;
         $totalCalories = 0;
         $totalProtein = 0;
         $totalFat = 0;
         $totalCarbs = 0;
-        
-        foreach ($recipe->ingredients as $recipeIngredient) {
+
+        foreach ($recipe['ingredients'] as $recipeIngredient) {
             $ingredient = $this->findIngredientByName($recipeIngredient['name'], $ingredients);
             if (!$ingredient) {
                 continue;
             }
-            
             $weight = $recipeIngredient['weight'];
             $totalWeight += $weight;
-            
             $totalCalories += ($ingredient['calories'] * $weight / 100);
             $totalProtein += ($ingredient['protein'] * $weight / 100);
             $totalFat += ($ingredient['fat'] * $weight / 100);
             $totalCarbs += ($ingredient['carbs'] * $weight / 100);
         }
-        
+
         return [
             'total_weight' => $totalWeight,
             'calories' => $totalCalories,
@@ -54,7 +43,7 @@ class NutritionCalculatorService
             'carbs' => $totalCarbs
         ];
     }
-    
+
     public function calculateFoodEntryNutrition(string $rawEntry, array $ingredients, array $recipes)
     {
         $parsedItems = $this->dataParserService->parseFoodEntryItems($rawEntry);
@@ -62,22 +51,19 @@ class NutritionCalculatorService
         $totalProtein = 0;
         $totalFat = 0;
         $totalCarbs = 0;
-        
         $processedItems = [];
-        
+
         foreach ($parsedItems as $item) {
             $itemName = $item['name'];
             $weight = $item['weight'];
-            
-            // Check if it's a recipe
+
             $recipe = $this->findRecipeByName($itemName, $recipes);
-            if ($recipe) {
+            if ($recipe && $recipe['total_weight'] > 0) {
                 $ratio = $weight / $recipe['total_weight'];
                 $calories = $recipe['calories'] * $ratio;
                 $protein = $recipe['protein'] * $ratio;
                 $fat = $recipe['fat'] * $ratio;
                 $carbs = $recipe['carbs'] * $ratio;
-                
                 $processedItems[] = [
                     'type' => 'recipe',
                     'name' => $recipe['name'],
@@ -88,14 +74,12 @@ class NutritionCalculatorService
                     'carbs' => $carbs
                 ];
             } else {
-                // Check if it's an ingredient
                 $ingredient = $this->findIngredientByName($itemName, $ingredients);
                 if ($ingredient) {
                     $calories = $ingredient['calories'] * $weight / 100;
                     $protein = $ingredient['protein'] * $weight / 100;
                     $fat = $ingredient['fat'] * $weight / 100;
                     $carbs = $ingredient['carbs'] * $weight / 100;
-                    
                     $processedItems[] = [
                         'type' => 'ingredient',
                         'name' => $ingredient['name'],
@@ -106,7 +90,6 @@ class NutritionCalculatorService
                         'carbs' => $carbs
                     ];
                 } else {
-                    // Unknown item
                     $processedItems[] = [
                         'type' => 'unknown',
                         'name' => $itemName,
@@ -118,13 +101,12 @@ class NutritionCalculatorService
                     ];
                 }
             }
-            
             $totalCalories += $processedItems[count($processedItems) - 1]['calories'];
             $totalProtein += $processedItems[count($processedItems) - 1]['protein'];
             $totalFat += $processedItems[count($processedItems) - 1]['fat'];
             $totalCarbs += $processedItems[count($processedItems) - 1]['carbs'];
         }
-        
+
         return [
             'parsed_items' => $processedItems,
             'calories' => $totalCalories,
@@ -133,46 +115,36 @@ class NutritionCalculatorService
             'carbs' => $totalCarbs
         ];
     }
-    
+
     private function findIngredientByName(string $name, array $ingredients)
     {
         $name = strtolower(trim($name));
-        
         foreach ($ingredients as $ingredient) {
             if (strtolower($ingredient['name']) === $name) {
                 return $ingredient;
             }
-            
             foreach ($ingredient['aliases'] as $alias) {
                 if (strtolower(trim($alias)) === $name) {
                     return $ingredient;
                 }
             }
         }
-        
         return null;
     }
-    
+
     private function findRecipeByName(string $name, array $recipes)
     {
         $name = strtolower(trim($name));
-        
         foreach ($recipes as $recipe) {
             if (strtolower($recipe['name']) === $name) {
                 return $recipe;
             }
-            
             foreach ($recipe['aliases'] as $alias) {
                 if (strtolower(trim($alias)) === $name) {
                     return $recipe;
                 }
             }
         }
-        
         return null;
     }
-}
-```
-
-# Test Strategy:
-Create unit tests with various food entries and recipes to verify correct calculation of nutrition values. Test scenarios with both ingredients and recipes in a single food entry. Verify that the calculator correctly handles weight ratios and unit conversions.
+} 
