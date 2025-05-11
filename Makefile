@@ -12,9 +12,6 @@ rebuild:
 restart:
 	docker-compose restart
 
-
-
-
 logs:
 	docker-compose logs -f
 
@@ -29,3 +26,21 @@ migrate:
 
 seed:
 	docker-compose exec app php artisan db:seed
+
+serve:
+	docker-compose exec app php artisan serve --host=0.0.0.0
+
+sync:
+	docker-compose exec app php artisan sync:sheets
+
+cron:
+	docker-compose exec app php artisan schedule:work
+
+test:
+	docker-compose exec app php artisan test
+
+status:
+	docker-compose ps
+
+art:
+	docker-compose exec app php artisan $(cmd)
