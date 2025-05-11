@@ -23,7 +23,7 @@ class TestSheets extends Command
 
         $this->info('Парсю данные...');
         $ingredients = $parser->parseIngredients($ingredientsRaw);
-        // dd($ingredients);
+        dd(collect($ingredients)->map(fn($item) => json_encode($item, JSON_UNESCAPED_UNICODE))->implode(PHP_EOL));
         $recipes = $parser->parseRecipes($recipesRaw);
         $foodLog = $parser->parseFoodLog($foodLogRaw);
 

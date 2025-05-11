@@ -11,22 +11,15 @@ class Recipe extends Model
 
     protected $fillable = [
         'name',
-        'aliases',
         'ingredients',
-        'total_weight',
-        'calories',
-        'protein',
-        'fat',
-        'carbs'
+        'comments',
+        'nutrients',
     ];
 
     protected $casts = [
-        'aliases' => 'array',
-        'ingredients' => 'array',
-        'total_weight' => 'float',
-        'calories' => 'float',
-        'protein' => 'float',
-        'fat' => 'float',
-        'carbs' => 'float'
+        'name' => 'string',
+        'ingredients' => 'string',
+        'comments' => 'string',
+        'nutrients' => 'string',
     ];
 } 

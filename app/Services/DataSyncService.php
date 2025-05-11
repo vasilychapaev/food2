@@ -54,8 +54,8 @@ class DataSyncService
         $parsedRecipes = $this->dataParserService->parseRecipes($rawData);
         $ingredients = Ingredient::all()->toArray();
         foreach ($parsedRecipes as $recipeData) {
-            $nutritionData = $this->nutritionCalculatorService->calculateRecipeNutrition($recipeData, $ingredients);
-            $recipeData = array_merge($recipeData, $nutritionData);
+            // $nutritionData = $this->nutritionCalculatorService->calculateRecipefNutrition($recipeData, $ingredients);
+            // $recipeData = array_merge($recipeData, $nutritionData);
             Recipe::updateOrCreate(
                 ['name' => $recipeData['name']],
                 $recipeData
@@ -73,17 +73,16 @@ class DataSyncService
         $recipes = Recipe::all()->toArray();
         $processedDates = [];
         foreach ($parsedFoodEntries as $foodEntryData) {
-            $nutritionData = $this->nutritionCalculatorService->calculateFoodEntryNutrition(
-                $foodEntryData['raw_entry'],
-                $ingredients,
-                $recipes
-            );
-            $foodEntryData = array_merge($foodEntryData, $nutritionData);
+            // $nutritionData = $this->nutritionCalculatorService->calculateFoodEntryNutrition(
+            //     $foodEntryData['raw_entry'],
+            //     $ingredients,
+            //     $recipes
+            // );
+            // $foodEntryData = array_merge($foodEntryData, $nutritionData);
             FoodEntry::updateOrCreate(
                 [
                     'date' => $foodEntryData['date'],
-                    'meal_number' => $foodEntryData['meal_number'],
-                    'raw_entry' => $foodEntryData['raw_entry']
+                    'food_no' => $foodEntryData['food_no'],
                 ],
                 $foodEntryData
             );

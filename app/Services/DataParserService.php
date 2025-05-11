@@ -9,17 +9,13 @@ class DataParserService
         $ingredients = [];
         $headers = array_shift($rawData);
         foreach ($rawData as $row) {
-            if (count($row) < count($headers)) {
+            if (count($row) < 5) {   // 5  [name-prot-fat-car-cal/...]
                 continue;
             }
-            $ingredient = [
-                'name' => $row[0] ?? '',
-                'aliases' => $this->parseAliases($row[1] ?? ''),
-                'calories' => (float)($row[2] ?? 0),
-                'protein' => (float)($row[3] ?? 0),
-                'fat' => (float)($row[4] ?? 0),
-                'carbs' => (float)($row[5] ?? 0)
-            ];
+            $ingredient = collect($headers)
+                ->combine(collect($row)->pad(count($headers), ''))
+                ->toArray();
+                $ingredient['nutrion100'] = collect($ingredient)->only(['protein', 'fat', 'carb', 'calories'])->toArray();
             $ingredients[] = $ingredient;
         }
         return $ingredients;
@@ -30,19 +26,12 @@ class DataParserService
         $recipes = [];
         $headers = array_shift($rawData);
         foreach ($rawData as $row) {
-            if (count($row) < count($headers)) {
-                continue;
-            }
-            $recipe = [
-                'name' => $row[0] ?? '',
-                'aliases' => $this->parseAliases($row[1] ?? ''),
-                'ingredients' => $this->parseRecipeIngredients($row[2] ?? ''),
-                'total_weight' => 0,
-                'calories' => 0,
-                'protein' => 0,
-                'fat' => 0,
-                'carbs' => 0
-            ];
+            // if (count($row) < 3) { // name, ingredients, nutrients
+            //     continue;
+            // }
+            $recipe = collect($headers)
+                ->combine(collect($row)->pad(count($headers), ''))
+                ->toArray();
             $recipes[] = $recipe;
         }
         return $recipes;
@@ -50,28 +39,23 @@ class DataParserService
 
     public function parseFoodLog(array $rawData)
     {
-        $foodEntries = [];
+        $foodItems = [];
         $headers = array_shift($rawData);
         foreach ($rawData as $row) {
-            if (count($row) < count($headers)) {
-                continue;
-            }
-            $date = $this->parseDate($row[0] ?? '');
-            $mealNumber = (int)($row[1] ?? 0);
-            $rawEntry = $row[2] ?? '';
+            $foodItem = collect($headers)
+                ->combine(collect($row)->pad(count($headers), ''))
+                ->toArray();
             $foodEntry = [
-                'date' => $date,
-                'meal_number' => $mealNumber,
-                'raw_entry' => $rawEntry,
-                'parsed_items' => [],
-                'calories' => 0,
-                'protein' => 0,
-                'fat' => 0,
-                'carbs' => 0
+                'date' => $this->parseDate($row[0] ?? ''),
+                'food_no' => $foodItem['no'],
+                'food_record' => $foodItem['food_record'],
+                'food_items' => $this->parseFoodEntryItems($foodItem['food_record']),
+                'json' => '...',
+                'nutrition' => '...',
             ];
-            $foodEntries[] = $foodEntry;
+            $foodItems[] = $foodEntry;
         }
-        return $foodEntries;
+        return $foodItems;
     }
 
     private function parseAliases(string $aliasString)

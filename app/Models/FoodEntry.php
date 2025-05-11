@@ -11,13 +11,11 @@ class FoodEntry extends Model
 
     protected $fillable = [
         'date',
-        'meal_number',
-        'raw_entry',
-        'parsed_items',
-        'calories',
-        'protein',
-        'fat',
-        'carbs'
+        'food_no',
+        'food_record',
+        'food_items',
+        'json',
+        'nutrition',
     ];
 
     protected $casts = [

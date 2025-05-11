@@ -9,6 +9,8 @@ RUN pecl install mongodb \
 
 RUN pecl install xdebug && docker-php-ext-enable xdebug
 
+COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+
 COPY --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www

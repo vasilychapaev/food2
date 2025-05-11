@@ -11,15 +11,19 @@ class Ingredient extends Model
 
     protected $fillable = [
         'name',
-        'aliases',
-        'calories',
         'protein',
         'fat',
-        'carbs'
+        'carbs',
+        'calories',
+        'nutrion100',
+        'fatsecret_id',
+        'comment',
+        'name_full',
+        'name_original',
+        'comment',
     ];
 
     protected $casts = [
-        'aliases' => 'array',
         'calories' => 'float',
         'protein' => 'float',
         'fat' => 'float',

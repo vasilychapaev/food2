@@ -9,9 +9,12 @@ services:
       - ./:/var/www
     ports:
       - "8000:8000"
+      - "9003:9003"
     command: php artisan serve --host=0.0.0.0
     depends_on:
       - mongo
+    environment:
+      XDEBUG_MODE: debug
 
   mongo:
     image: mongo:latest

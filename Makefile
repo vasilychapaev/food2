@@ -4,19 +4,37 @@ up:
 down:
 	docker-compose down
 
-rebuild:
-	docker-compose down --volumes --remove-orphans
-	docker-compose build --no-cache
-	docker-compose up -d
-
 restart:
 	docker-compose restart
 
-logs:
-	docker-compose logs -f
+build:
+	docker-compose down
+	docker-compose build --no-cache
+	docker-compose up -d
+
+rebuild:
+	docker-compose down --remove-orphans --volumes
+	docker-compose build --no-cache
+	docker-compose up -d
 
 bash:
 	docker-compose exec app bash
+
+test:
+	docker-compose exec app php artisan test
+
+status:
+	docker-compose ps
+
+art:
+	docker-compose exec app php artisan $(cmd)
+
+
+
+
+
+logs:
+	docker-compose logs -f
 
 tinker:
 	docker-compose exec app php artisan tinker
@@ -36,11 +54,3 @@ sync:
 cron:
 	docker-compose exec app php artisan schedule:work
 
-test:
-	docker-compose exec app php artisan test
-
-status:
-	docker-compose ps
-
-art:
-	docker-compose exec app php artisan $(cmd)
